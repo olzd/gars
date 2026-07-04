@@ -1,0 +1,19 @@
+[package]
+name = "cleaning_robot"
+version = "0.1.0"
+edition = "2024"
+authors = ["olzd"]
+description = "A simple cleaning robot example"
+readme = "README.md"
+license = "GPL-3"
+
+[dependencies]
+gars.workspace = true
+rand = { version = "0.10.1", features = ["chacha"] }
+
+anyhow = "1.0.102"
+clap = { version = "4.6.1", features = ["unstable-doc", "derive"] }
+crossterm = "0.29.0"
+ratatui = "0.30.1"
+serde = { version = "1.0.228", features = ["derive"]}
+serde_json = "1.0.150"

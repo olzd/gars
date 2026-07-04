@@ -1,0 +1,19 @@
+[package]
+name = "gars"
+version = "0.1.0"
+edition = "2024"
+authors = ["olzd"]
+description = "A generic, deterministic, parallel genetic algorithm engine"
+repository = "https://github.com/olzd/gars"
+readme = "README.md"
+license = "GPL-3"
+
+[dependencies]
+rand = { version = "0.10.1", features = ["chacha"] }
+rayon = "1.12.0"
+
+[workspace]
+members = ["examples/cleaning_robot"]
+
+[workspace.dependencies]
+gars = { path = "." }
