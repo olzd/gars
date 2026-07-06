@@ -13,7 +13,7 @@ rand = { version = "0.10.1", features = ["chacha"] }
 rayon = "1.12.0"
 
 [workspace]
-members = ["examples/cleaning_robot"]
+members = ["examples/cleaning_robot", "examples/snek"]
 
 [workspace.dependencies]
 gars = { path = "." }
