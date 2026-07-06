@@ -18,7 +18,10 @@ Key properties:
 - **Observable**: register multiple observers to log progress, display live
   statistics, ...
 
-A full example (robot cleaning a 2D grid) is available in the `examples/` directory.
+The `examples/` directory contains implementation of:
+
+- a cleaning robot
+- a snake game
 
 ## Design
 
