@@ -1,9 +1,9 @@
-use rand::{Rng, RngExt};
-use rand::distr::StandardUniform;
-use gars::{Individual, Evaluator, Operator, Selector};
 use crate::genome::Genome;
 use crate::grid::Grid;
 use crate::simulation::{Simulation, SimulationHistory, StepResult};
+use gars::{Evaluator, Individual, Operator, Selector};
+use rand::distr::StandardUniform;
+use rand::{Rng, RngExt};
 
 pub struct RobotEvaluator {
     pub grid_with: usize,
@@ -44,7 +44,13 @@ impl Evaluator<Genome> for RobotEvaluator {
         // generated grids
         let mut total = 0.0;
         for _ in 0..self.eval_runs {
-            let grid = Grid::new_random(self.grid_with, self.grid_height, self.obj_prob, self.wall_prob, rng);
+            let grid = Grid::new_random(
+                self.grid_with,
+                self.grid_height,
+                self.obj_prob,
+                self.wall_prob,
+                rng,
+            );
             let sim = Simulation::new(grid, self.initial_energy);
             let history = sim.run(genotype, rng);
             let fitness = self.fitness(&history);
@@ -85,7 +91,11 @@ pub struct TournamentSelector {
 }
 
 impl Selector<Genome> for TournamentSelector {
-    fn select<'a>(&self, population: &'a [Individual<Genome>], rng: &mut impl Rng) -> &'a Individual<Genome> {
+    fn select<'a>(
+        &self,
+        population: &'a [Individual<Genome>],
+        rng: &mut impl Rng,
+    ) -> &'a Individual<Genome> {
         (0..self.size)
             .map(|_| &population[rng.random_range(0..population.len())])
             .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap())

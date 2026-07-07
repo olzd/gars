@@ -1,31 +1,31 @@
-use rand::rngs::ChaCha8Rng;
-use rand::SeedableRng;
-use rayon::prelude::*;
 use crate::ga::{Evaluator, Genotype, Individual, Operator, Selector};
 use crate::observer::{GenerationObserver, GenerationStats};
+use rand::SeedableRng;
+use rand::rngs::ChaCha8Rng;
+use rayon::prelude::*;
 
 /// The main genetic algorithm engine.
-/// 
+///
 /// The engine manages the entire evolution loop: evaluation, selection, crossover and mutation.
 /// It is fully generic over:
-/// 
+///
 /// * `G` - the [`genotype`][`Genotype`],
 /// * `E` - the [`evaluator`][`Evaluator`],
 /// * `O` - the genetic [`operators`][`Operator`],
 /// * `S` - the selection operator.
-/// 
+///
 /// # Determinism and parallelism
-/// 
+///
 /// The engine is deterministic given a master seed. Parallel evaluation uses `ChaCha8Rng` with
 /// [`ChaCha8Rng::set_stream`] to assign a unique, reproducible RNG to each individual.
-/// 
+///
 /// # Observers
-/// 
+///
 /// Multiple [`GenerationObserver`] can be registered via [`Engine::add_observer`] and they will
 /// be notified in order after every generation evaluation.
-/// 
+///
 /// # History
-/// 
+///
 /// Per-generation statistics (see [`GenerationStats`]) are automatically recorded.
 pub struct Engine<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> {
     config: Config,
@@ -42,9 +42,9 @@ pub struct Engine<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> 
 
 impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, O, S> {
     /// Create a new engine with an initial random population.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `config` - the engine general [`configuration`][`Config`].
     /// * `evaluator`- the problem-specific fitness function.
     /// * `operator` - the crossover and mutation implementation.
@@ -74,7 +74,7 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
         }
     }
 
-    /// Return the complete generation statistics. 
+    /// Return the complete generation statistics.
     pub fn history(&self) -> &[GenerationStats] {
         &self.history
     }
@@ -91,7 +91,7 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
 
     /// Register a new [`observer`][`GenerationObserver`] that will be notified after every
     /// generation evaluation.
-    /// 
+    ///
     /// Observers will be notified in the order they were added.
     pub fn add_observer(&mut self, observer: Box<dyn GenerationObserver<G>>) {
         self.observers.push(observer);
@@ -102,7 +102,7 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
     /// 2. compute stats
     /// 4. notify registered observers
     /// 3. evolve population
-    /// 
+    ///
     /// This is the heart of the engine. Call it manually to step through, or use [`Engine::run`]
     /// to iterate automatically.
     pub fn step(&mut self) {
@@ -110,15 +110,14 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
         self.evaluate();
 
         // compute stats
-        let best = self.population
+        let best = self
+            .population
             .iter()
             .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap())
             .unwrap();
 
-        let avg_fitness = self.population
-            .iter()
-            .map(|p| p.fitness)
-            .sum::<f64>() / self.population.len() as f64;
+        let avg_fitness =
+            self.population.iter().map(|p| p.fitness).sum::<f64>() / self.population.len() as f64;
 
         let stats = GenerationStats {
             generation: self.generation,
@@ -142,7 +141,7 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
     }
 
     /// Run all remaining generations.
-    /// 
+    ///
     /// This is a convenient wrapper around [`Engine::step`].
     pub fn run(&mut self) {
         while self.generation < self.config.max_generations {
@@ -177,7 +176,8 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
     /// 4. add the new individuals to the new generation
     fn evolve(&mut self) {
         // create new population preserving the elites
-        self.population.sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+        self.population
+            .sort_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
         let mut population = Vec::with_capacity(self.config.population_size);
         for i in 0..self.config.elite_count {
             population.push(self.population[i].clone());
@@ -185,10 +185,16 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
 
         while population.len() < self.config.population_size {
             // select 2 parents
-            let p1 = self.selector.select(&self.population, &mut self.evolution_rng);
-            let p2 = self.selector.select(&self.population, &mut self.evolution_rng);
+            let p1 = self
+                .selector
+                .select(&self.population, &mut self.evolution_rng);
+            let p2 = self
+                .selector
+                .select(&self.population, &mut self.evolution_rng);
             // apply crossover
-            let (mut g1, mut g2) = self.operator.crossover(&p1.genotype, &p2.genotype, &mut self.evolution_rng);
+            let (mut g1, mut g2) =
+                self.operator
+                    .crossover(&p1.genotype, &p2.genotype, &mut self.evolution_rng);
             // mutate children
             self.operator.mutate(&mut g1, &mut self.evolution_rng);
             self.operator.mutate(&mut g2, &mut self.evolution_rng);
@@ -203,7 +209,7 @@ impl<G: Genotype, E: Evaluator<G>, O: Operator<G>, S: Selector<G>> Engine<G, E, 
 }
 
 /// The [`Engine`] configuration.
-/// 
+///
 /// It does not hold parameters for problem-specific components ([`evaluator`][`Evaluator`],
 /// [`operators`][`Operator`] or [`selector`][`Selector`]) as they are the concrete implementations'
 /// responsibility.

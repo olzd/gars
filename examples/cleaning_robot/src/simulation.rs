@@ -1,7 +1,7 @@
-use rand::{Rng, RngExt};
-use rand::distr::StandardUniform;
-use crate::grid::{Direction, Grid, Tile};
 use crate::genome::{Action, Genome};
+use crate::grid::{Direction, Grid, Tile};
+use rand::distr::StandardUniform;
+use rand::{Rng, RngExt};
 
 pub struct Simulation {
     grid: Grid,
@@ -61,27 +61,25 @@ impl Simulation {
                     } else {
                         StepResult::FailedPickup
                     }
-                },
+                }
                 Action::MoveNorth | Action::MoveSouth | Action::MoveEast | Action::MoveWest => {
                     let dir = Direction::try_from(action).unwrap();
                     self.update_pos(self.x, self.y, dir)
-                },
+                }
                 Action::MoveRandom => {
                     let dir = rng.sample(StandardUniform);
                     self.update_pos(self.x, self.y, dir)
-                },
+                }
             };
             // subtract the action's energy cost
             self.energy -= cost;
             // keep track of the new state
-            self.history.push(
-                StepRecord {
-                    x: self.x,
-                    y: self.y,
-                    energy: self.energy,
-                    result: step,
-                }
-            );
+            self.history.push(StepRecord {
+                x: self.x,
+                y: self.y,
+                energy: self.energy,
+                result: step,
+            });
             true
         }
     }
@@ -94,17 +92,17 @@ impl Simulation {
             match dir {
                 Direction::North => {
                     self.y -= 1;
-                },
+                }
                 Direction::South => {
                     self.y += 1;
-                },
+                }
                 Direction::East => {
                     self.x += 1;
-                },
+                }
                 Direction::West => {
                     self.x -= 1;
-                },
-                Direction::None => {},
+                }
+                Direction::None => {}
             }
             StepResult::Moved(dir)
         }
@@ -163,7 +161,13 @@ pub struct SimulationHistory {
 
 impl SimulationHistory {
     #[must_use]
-    pub fn new(initial_energy: f64, remaining_energy: f64, collected_obj: u32, remaining_obj: u32, steps: Vec<StepRecord>) -> Self {
+    pub fn new(
+        initial_energy: f64,
+        remaining_energy: f64,
+        collected_obj: u32,
+        remaining_obj: u32,
+        steps: Vec<StepRecord>,
+    ) -> Self {
         Self {
             initial_energy,
             remaining_energy,

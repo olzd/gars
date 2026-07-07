@@ -1,18 +1,18 @@
-use std::path::PathBuf;
-use anyhow::Result;
-use clap::{Parser, Subcommand};
-use rand::distr::StandardUniform;
-use rand::prelude::*;
-use rand::rngs::ChaCha8Rng;
-use gars::{Config, Engine};
 use crate::ga::{GenomeOperator, RobotEvaluator, TournamentSelector};
 use crate::genome::Genome;
 use crate::grid::Grid;
 use crate::simulation::Simulation;
 use crate::tui::run_watch;
+use anyhow::Result;
+use clap::{Parser, Subcommand};
+use gars::{Config, Engine};
+use rand::distr::StandardUniform;
+use rand::prelude::*;
+use rand::rngs::ChaCha8Rng;
+use std::path::PathBuf;
 
-mod genome;
 mod ga;
+mod genome;
 mod grid;
 mod simulation;
 mod tui;
@@ -149,9 +149,7 @@ fn main() -> Result<()> {
             let operator = GenomeOperator {
                 mutation_rate: mutation,
             };
-            let selector = TournamentSelector {
-                size: tournament,
-            };
+            let selector = TournamentSelector { size: tournament };
             let config = Config {
                 population_size: pop_size,
                 max_generations: generations,
@@ -180,13 +178,7 @@ fn main() -> Result<()> {
             let genome: Genome = serde_json::from_reader(reader)?;
             let seed = seed.unwrap_or_else(|| rand::rng().sample(StandardUniform));
             let mut rng = ChaCha8Rng::seed_from_u64(seed);
-            let grid = Grid::new_random(
-                width,
-                height,
-                obj_prob,
-                wall_prob,
-                &mut rng,
-            );
+            let grid = Grid::new_random(width, height, obj_prob, wall_prob, &mut rng);
             let sim = Simulation::new(grid, energy);
             run_watch(sim, &genome, &mut rng)?;
         }

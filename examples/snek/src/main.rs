@@ -1,17 +1,17 @@
-use std::path::PathBuf;
-use clap::{Parser, Subcommand};
-use rand::distr::StandardUniform;
-use rand::{RngExt, SeedableRng};
-use rand::rngs::ChaCha8Rng;
-use gars::{Config, Engine};
 use crate::ga::{GenomeOperator, SnakeEvaluator, TournamentSelector};
 use crate::genome::Genome;
 use crate::simulation::Simulation;
 use crate::tui::run_watch;
+use clap::{Parser, Subcommand};
+use gars::{Config, Engine};
+use rand::distr::StandardUniform;
+use rand::rngs::ChaCha8Rng;
+use rand::{RngExt, SeedableRng};
+use std::path::PathBuf;
 
+mod ga;
 mod genome;
 mod simulation;
-mod ga;
 mod tui;
 
 #[derive(Parser)]

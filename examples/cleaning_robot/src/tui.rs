@@ -1,24 +1,24 @@
+use crate::genome::Genome;
+use crate::grid;
+use crate::grid::Tile;
+use crate::simulation::Simulation;
 use anyhow::Result;
 use crossterm::{
     event::{self, Event, KeyCode, KeyEventKind},
     execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
 use rand::Rng;
 use ratatui::{
+    Frame, Terminal,
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::Span,
     widgets::{Block, Borders, Paragraph},
-    Frame, Terminal,
 };
 use std::io;
 use std::time::Duration;
-use crate::genome::Genome;
-use crate::grid;
-use crate::grid::Tile;
-use crate::simulation::Simulation;
 
 pub fn run_watch<R: Rng>(mut sim: Simulation, genome: &Genome, rng: &mut R) -> Result<()> {
     // terminal setup
@@ -37,7 +37,9 @@ pub fn run_watch<R: Rng>(mut sim: Simulation, genome: &Genome, rng: &mut R) -> R
         if auto_run {
             // Check for interrupt key
             if event::poll(Duration::from_millis(0))? {
-                if let Event::Key(key) = event::read()? && key.kind == KeyEventKind::Press {
+                if let Event::Key(key) = event::read()?
+                    && key.kind == KeyEventKind::Press
+                {
                     match key.code {
                         KeyCode::Char('q' | 'Q') => break,
                         KeyCode::Char('a' | 'A') => auto_run = false,
@@ -48,12 +50,14 @@ pub fn run_watch<R: Rng>(mut sim: Simulation, genome: &Genome, rng: &mut R) -> R
             let _ = sim.step(genome, rng);
             terminal.draw(|f| draw_frame(f, &sim))?;
             std::thread::sleep(auto_delay);
-        } else if let Event::Key(key) = event::read()? && key.kind == KeyEventKind::Press {
+        } else if let Event::Key(key) = event::read()?
+            && key.kind == KeyEventKind::Press
+        {
             match key.code {
                 KeyCode::Char(' ') => {
                     let _ = sim.step(genome, rng);
                     terminal.draw(|f| draw_frame(f, &sim))?;
-                },
+                }
                 KeyCode::Char('a' | 'A') => auto_run = true,
                 KeyCode::Char('q' | 'Q') => break,
                 _ => {}
@@ -97,12 +101,17 @@ fn draw_frame(f: &mut Frame, sim: &Simulation) {
     // Helper: choose tile symbol and style
     let tile_char = |x: usize, y: usize| -> (char, Style) {
         if x == rx && y == ry {
-            ('●', Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+            (
+                '●',
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            )
         } else {
             match grid.peek(x, y, grid::Direction::None) {
-                Tile::Empty => (' ', Style::default()),       // invisible
+                Tile::Empty => (' ', Style::default()), // invisible
                 Tile::Wall => ('█', Style::default().fg(Color::Red)),
-                Tile::Obj  => ('◆', Style::default().fg(Color::Green)),
+                Tile::Obj => ('◆', Style::default().fg(Color::Green)),
             }
         }
     };
@@ -112,9 +121,9 @@ fn draw_frame(f: &mut Frame, sim: &Simulation) {
     // Top border
     let top = "┌".to_string()
         + &(0..grid.width)
-        .map(|_| "─".repeat(cell_width))
-        .collect::<Vec<_>>()
-        .join("┬")
+            .map(|_| "─".repeat(cell_width))
+            .collect::<Vec<_>>()
+            .join("┬")
         + "┐";
     lines.push(ratatui::text::Line::from(Span::raw(top)));
 
@@ -133,9 +142,9 @@ fn draw_frame(f: &mut Frame, sim: &Simulation) {
         if y < grid.height - 1 {
             let sep = "├".to_string()
                 + &(0..grid.width)
-                .map(|_| "─".repeat(cell_width))
-                .collect::<Vec<_>>()
-                .join("┼")
+                    .map(|_| "─".repeat(cell_width))
+                    .collect::<Vec<_>>()
+                    .join("┼")
                 + "┤";
             lines.push(ratatui::text::Line::from(Span::raw(sep)));
         }
@@ -144,9 +153,9 @@ fn draw_frame(f: &mut Frame, sim: &Simulation) {
     // Bottom border
     let bottom = "└".to_string()
         + &(0..grid.width)
-        .map(|_| "─".repeat(cell_width))
-        .collect::<Vec<_>>()
-        .join("┴")
+            .map(|_| "─".repeat(cell_width))
+            .collect::<Vec<_>>()
+            .join("┴")
         + "┘";
     lines.push(ratatui::text::Line::from(Span::raw(bottom)));
 

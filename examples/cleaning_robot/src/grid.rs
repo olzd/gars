@@ -1,6 +1,6 @@
+use crate::genome::Action;
 use rand::distr::{Distribution, StandardUniform};
 use rand::{Rng, RngExt};
-use crate::genome::Action;
 
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
 #[repr(u8)]
@@ -32,7 +32,7 @@ impl TryFrom<Action> for Direction {
             Action::MoveEast => Ok(Direction::East),
             Action::MoveWest => Ok(Direction::West),
             Action::Idle | Action::Pickup => Ok(Direction::None),
-            Action::MoveRandom => Err("cannot guess direction from random move")
+            Action::MoveRandom => Err("cannot guess direction from random move"),
         }
     }
 }
@@ -46,7 +46,7 @@ impl Distribution<Direction> for StandardUniform {
             2 => Direction::East,
             3 => Direction::West,
             4 => Direction::None,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
@@ -61,7 +61,13 @@ pub struct Grid {
 
 impl Grid {
     #[must_use]
-    pub fn new_random<R: Rng>(width: usize, height: usize, obj_prob: f64, wall_prob: f64, rng: &mut R) -> Self {
+    pub fn new_random<R: Rng>(
+        width: usize,
+        height: usize,
+        obj_prob: f64,
+        wall_prob: f64,
+        rng: &mut R,
+    ) -> Self {
         let mut tiles = vec![Tile::default(); width * height];
         let mut remaining_obj = 0;
 
@@ -95,9 +101,9 @@ impl Grid {
         match dir {
             Direction::North if y > 0 => self.tiles[(y - 1) * self.width + x],
             Direction::South if y + 1 < self.height => self.tiles[(y + 1) * self.width + x],
-            Direction::East if x + 1 < self.width => self.tiles[y*self.width + x+1],
-            Direction::West if x > 0 => self.tiles[y*self.width + x-1],
-            Direction::None => self.tiles[y*self.width + x],
+            Direction::East if x + 1 < self.width => self.tiles[y * self.width + x + 1],
+            Direction::West if x > 0 => self.tiles[y * self.width + x - 1],
+            Direction::None => self.tiles[y * self.width + x],
             _ => Tile::Wall,
         }
     }

@@ -1,7 +1,7 @@
-use rand::{Rng, RngExt};
-use rand::distr::Uniform;
-use serde::{Deserialize, Serialize};
 use gars::Genotype;
+use rand::distr::Uniform;
+use rand::{Rng, RngExt};
+use serde::{Deserialize, Serialize};
 
 /// A small feed-forward neural network with one hidden layer.
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -14,13 +14,14 @@ pub struct Genome {
 
 impl Genome {
     /// The number of input weights.
-    pub const INPUT_SIZE: usize = 11;
+    pub const INPUT_SIZE: usize = 16;
     /// The number of hidden weights.
     pub const HIDDEN_SIZE: usize = 16;
     /// The number of output weights.
     pub const OUTPUT_SIZE: usize = 3;
     /// The total number of weights.
-    pub const NUM_WEIGHTS: usize = Self::INPUT_SIZE * Self::HIDDEN_SIZE + Self::HIDDEN_SIZE * Self::OUTPUT_SIZE;
+    pub const NUM_WEIGHTS: usize =
+        Self::INPUT_SIZE * Self::HIDDEN_SIZE + Self::HIDDEN_SIZE * Self::OUTPUT_SIZE;
 
     #[must_use]
     pub fn new(weights: Vec<f64>) -> Self {
@@ -46,7 +47,8 @@ impl Genome {
         for o in 0..Self::OUTPUT_SIZE {
             let mut sum = 0.0;
             for h in 0..Self::HIDDEN_SIZE {
-                sum += w[Self::INPUT_SIZE * Self::HIDDEN_SIZE + h * Self::OUTPUT_SIZE + o] * hidden[h];
+                sum +=
+                    w[Self::INPUT_SIZE * Self::HIDDEN_SIZE + h * Self::OUTPUT_SIZE + o] * hidden[h];
             }
             outputs[o] = sum;
         }
@@ -69,10 +71,7 @@ impl Genome {
 impl Genotype for Genome {
     fn random(rng: &mut impl Rng) -> Self {
         let dist = Uniform::new(-1.0, 1.0).unwrap();
-        let weights = rng
-            .sample_iter(dist)
-            .take(Self::NUM_WEIGHTS)
-            .collect();
+        let weights = rng.sample_iter(dist).take(Self::NUM_WEIGHTS).collect();
         Self::new(weights)
     }
 }

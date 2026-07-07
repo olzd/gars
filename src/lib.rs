@@ -1,7 +1,7 @@
+pub mod engine;
 pub mod ga;
 pub mod observer;
-pub mod engine;
 
-pub use ga::{Genotype, Individual, Evaluator, Operator, Selector};
-pub use observer::{GenerationStats, GenerationObserver};
-pub use engine::{Engine, Config};
+pub use engine::{Config, Engine};
+pub use ga::{Evaluator, Genotype, Individual, Operator, Selector};
+pub use observer::{GenerationObserver, GenerationStats};

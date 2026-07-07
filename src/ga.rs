@@ -85,7 +85,10 @@ impl<G: Genotype> Individual<G> {
     /// Construct a new individual from the given [`genotype`][`Genotype`].
     /// Its [`fitness`][`Individual::fitness`] will be initialized to 0.
     pub fn new(genotype: G) -> Self {
-        Self { genotype, fitness: 0.0 }
+        Self {
+            genotype,
+            fitness: 0.0,
+        }
     }
 
     /// Construct a new individual with a random [`genotype`][`Genotype`].

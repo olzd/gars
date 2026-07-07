@@ -1,8 +1,8 @@
-use std::ops::{Deref, DerefMut};
+use gars::Genotype;
 use rand::distr::{Distribution, StandardUniform};
 use rand::{Rng, RngExt};
 use serde::{Deserialize, Serialize};
-use gars::Genotype;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct Genome(Vec<Action>);

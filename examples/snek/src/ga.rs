@@ -1,7 +1,7 @@
-use rand::{Rng, RngExt};
-use gars::{Evaluator, Individual, Operator, Selector};
 use crate::genome::Genome;
 use crate::simulation::Simulation;
+use gars::{Evaluator, Individual, Operator, Selector};
+use rand::{Rng, RngExt};
 
 pub struct SnakeEvaluator {
     pub grid_width: usize,
@@ -58,7 +58,11 @@ pub struct TournamentSelector {
 }
 
 impl Selector<Genome> for TournamentSelector {
-    fn select<'a>(&self, population: &'a [Individual<Genome>], rng: &mut impl Rng) -> &'a Individual<Genome> {
+    fn select<'a>(
+        &self,
+        population: &'a [Individual<Genome>],
+        rng: &mut impl Rng,
+    ) -> &'a Individual<Genome> {
         (0..self.size)
             .map(|_| &population[rng.random_range(0..population.len())])
             .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap())
