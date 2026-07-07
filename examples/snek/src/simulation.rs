@@ -1,9 +1,9 @@
-use std::collections::VecDeque;
-use rand::{Rng, RngExt};
 use crate::genome::{Action, Genome};
+use rand::{Rng, RngExt};
+use std::collections::VecDeque;
 
 pub struct Simulation {
-    pub width:  usize,
+    pub width: usize,
     pub height: usize,
     pub snake: VecDeque<(usize, usize)>,
     pub food: (usize, usize),
@@ -38,7 +38,7 @@ impl Simulation {
     pub fn run(&mut self, genotype: &Genome, rng: &mut impl Rng) {
         while self.step(genotype, rng) {}
     }
-    
+
     /// Apply a relative action: move the snake and handle food/collision.
     ///
     /// Returns `true` if the simulation continues, `false` if dead or max steps reached.
@@ -64,7 +64,7 @@ impl Simulation {
         if x >= self.width || y >= self.height {
             return false;
         }
-        
+
         // check self collision (ignore tail because it will move, unless food is eaten)
         if self.snake.contains(&new_head) {
             // safe if the new head won't reach the tail or if it is but the tail will move
@@ -97,9 +97,12 @@ impl Simulation {
         let straight_dir = self.direction;
         let left_dir = straight_dir.turn_left();
         let right_dir = straight_dir.turn_right();
-        let danger_straight = Self::is_position_dangerous(self.width, self.height, &self.snake, straight_dir);
-        let danger_left = Self::is_position_dangerous(self.width, self.height, &self.snake, left_dir);
-        let danger_right = Self::is_position_dangerous(self.width, self.height, &self.snake, right_dir);
+        let danger_straight =
+            Self::is_position_dangerous(self.width, self.height, &self.snake, straight_dir);
+        let danger_left =
+            Self::is_position_dangerous(self.width, self.height, &self.snake, left_dir);
+        let danger_right =
+            Self::is_position_dangerous(self.width, self.height, &self.snake, right_dir);
 
         // food direction relative to head position
         let head = self.snake[0];
@@ -109,7 +112,7 @@ impl Simulation {
         let food_up = food.1 < head.1;
         let food_down = food.1 > head.1;
 
-        // current direction
+        // current head direction
         let (up, down, left, right) = match straight_dir {
             Direction::Up => (1.0, 0.0, 0.0, 0.0),
             Direction::Down => (0.0, 1.0, 0.0, 0.0),
@@ -117,7 +120,21 @@ impl Simulation {
             Direction::Right => (0.0, 0.0, 0.0, 1.0),
         };
 
+        // tail direction relative to the head
+        let tail = self.snake.back().unwrap();
+        let tail_left = tail.0 < head.0;
+        let tail_right = tail.0 > head.0;
+        let tail_up = tail.1 < head.1;
+        let tail_down = tail.1 > head.1;
+
+        // compute normalized Manhattan distance from head to food
+        let (hx, hy) = head;
+        let (fx, fy) = food;
+        let food_dist =
+            (hx.abs_diff(fx) + hy.abs_diff(fy)) as f64 / self.width.max(self.height) as f64;
+
         vec![
+            food_dist,
             danger_straight.into(),
             danger_left.into(),
             danger_right.into(),
@@ -125,6 +142,10 @@ impl Simulation {
             food_right.into(),
             food_up.into(),
             food_down.into(),
+            tail_left.into(),
+            tail_right.into(),
+            tail_up.into(),
+            tail_down.into(),
             up,
             down,
             left,
@@ -133,7 +154,12 @@ impl Simulation {
     }
 
     #[inline]
-    fn random_food(snake: &VecDeque<(usize, usize)>, width: usize, height: usize, rng: &mut impl Rng) -> (usize, usize) {
+    fn random_food(
+        snake: &VecDeque<(usize, usize)>,
+        width: usize,
+        height: usize,
+        rng: &mut impl Rng,
+    ) -> (usize, usize) {
         loop {
             let x = rng.random_range(0..width);
             let y = rng.random_range(0..height);
@@ -144,7 +170,12 @@ impl Simulation {
     }
 
     #[inline]
-    fn is_position_dangerous(width: usize, height: usize, snake: &VecDeque<(usize, usize)>, dir: Direction) -> bool {
+    fn is_position_dangerous(
+        width: usize,
+        height: usize,
+        snake: &VecDeque<(usize, usize)>,
+        dir: Direction,
+    ) -> bool {
         let head = snake[0];
         let (dx, dy) = dir.delta();
         let new_x = head.0.checked_add_signed(dx).unwrap_or(width);
@@ -155,7 +186,6 @@ impl Simulation {
         snake.contains(&(new_x, new_y))
     }
 }
-
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Direction {
