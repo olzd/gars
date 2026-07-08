@@ -4,8 +4,10 @@ Snake implementation where the genome is represented by the weights of a (11, 16
 
 The inputs fed to the network are:
 
+- the normalized Manhattan distance between the head of the snake and the food
 - the dangerous position next to the current heading (i.e. body or wall straight ahead, left or right)
 - the general direction of the food relative to the head position (i.e. left, right, up or down)
+- the general direction of the tail of the snake relative to the head position (i.e. left, right, up or down)
 - the current direction
 
 # Running the example
